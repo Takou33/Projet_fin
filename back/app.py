@@ -69,12 +69,9 @@ def import_events():
     from models.event import event
     
     OA_KEY = "8a135178e6c348169f33f0bab8e1dc17"
+    # Importer seulement 1 agenda pour éviter le timeout (plan gratuit Render = 30s max)
     AGENDAS = [
         {"uid": "2363867", "name": "Nantes"},
-        {"uid": "42448083", "name": "Toulouse"},
-        {"uid": "85319813", "name": "Rennes"},
-        {"uid": "5746", "name": "JNA Normandie"},
-        {"uid": "979472", "name": "Jardins ouverts"},
     ]
     
     def parse_date(date_str):
@@ -97,8 +94,8 @@ def import_events():
     
     total_count = 0
     for agenda in AGENDAS:
-        OA_URL = f"https://api.openagenda.com/v2/agendas/{agenda['uid']}/events?key={OA_KEY}&size=300"
-        response = requests.get(OA_URL)
+        OA_URL = f"https://api.openagenda.com/v2/agendas/{agenda['uid']}/events?key={OA_KEY}&size=100"
+        response = requests.get(OA_URL, timeout=10)
         data = response.json()
         count = 0
         for ev in data.get("events", []):
