@@ -2,6 +2,8 @@ import api from "./api";
 
 const authService = {
   register: async (userData) => {
+    console.log("API URL:", process.env.REACT_APP_API_URL);
+    console.log("Full URL:", `${process.env.REACT_APP_API_URL}/register`);
     const res = await fetch(`${process.env.REACT_APP_API_URL}/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -6,7 +6,7 @@ export default function RegisterStep1({ userData, setUserData, setStep, errors, 
     setErrors({});
   };
 
-  const handleNext = (e) => {
+  const handleNext = async (e) => {
     e.preventDefault();
     setErrors({});
     if (userData.username.length < 6) {
@@ -27,12 +27,46 @@ export default function RegisterStep1({ userData, setUserData, setStep, errors, 
       setErrors({ global: "Le code postal doit contenir exactement 5 chiffres." });
       return;
     }
-    setStep(2);
+    
+    // Vérifier si le username ou l'email existe déjà
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/check-user`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ 
+          username: userData.username,
+          email: userData.email 
+        }),
+      });
+      const data = await response.json();
+      
+      if (!response.ok) {
+        setErrors({ global: data.msg });
+        return;
+      }
+      
+      setStep(2);
+    } catch (error) {
+      setErrors({ global: "Erreur lors de la vérification" });
+    }
   };
 
   return (
     <form onSubmit={handleNext}>
       <h2>Inscription</h2>
+      
+      <div style={{ 
+        backgroundColor: "#E3F2FD", 
+        color: "#1565C0", 
+        padding: "12px 15px", 
+        borderRadius: "6px", 
+        marginBottom: "20px",
+        border: "2px solid #2196F3",
+        fontSize: "0.95rem"
+      }}>
+        <strong>ℹ️ Information :</strong> Étant un site fictif, vous pouvez utiliser une adresse mail fictive.
+      </div>
+      
       <input
         className="form-control mb-2"
         name="username"

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import eventservice from "../services/eventService";
+import api from "../services/api";
 
 const Editevent = ({ user }) => {
   const { id } = useParams();
@@ -18,9 +19,9 @@ const Editevent = ({ user }) => {
   }, [id]);
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL}/genres/categories`)
-      .then((res) => res.json())
-      .then(setCategories);
+    api.get("/genres/categories")
+      .then((res) => setCategories(res.data))
+      .catch(err => console.error("Erreur chargement catégories:", err));
   }, []);
 
   if (!event) return <div>Chargement...</div>;

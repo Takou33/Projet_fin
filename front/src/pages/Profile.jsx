@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import authService from "../services/authService";
 import eventService from "../services/eventService";
+import api from "../services/api";
 
 const Profile = ({ user }) => {
   const [showReset, setShowReset] = useState(false);
@@ -20,9 +21,9 @@ const Profile = ({ user }) => {
 
   useEffect(() => {
     eventService.getAllGenres().then(setAllOptions);
-    fetch(`${process.env.REACT_APP_API_URL}/genres/categories`)
-      .then(res => res.json())
-      .then(setCategories);
+    api.get("/genres/categories")
+      .then(res => setCategories(res.data))
+      .catch(err => console.error("Erreur chargement catégories:", err));
   }, []);
 
   if (!user) return <p>Chargement du profil...</p>;

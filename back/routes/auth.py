@@ -11,6 +11,19 @@ from back.config import BASE_URL, FRONTEND_URL
 auth_bp = Blueprint("auth", __name__)
 
 
+@auth_bp.route("/check-user", methods=["POST"])
+def check_user():
+    """Vérifie si un username ou email existe déjà"""
+    data = request.get_json()
+    
+    if User.query.filter_by(username=data.get("username")).first():
+        return jsonify({"msg": "Nom d'utilisateur déjà utilisé"}), 400
+    if User.query.filter_by(email=data.get("email")).first():
+        return jsonify({"msg": "Email déjà utilisé"}), 400
+    
+    return jsonify({"msg": "OK"}), 200
+
+
 @auth_bp.route("/register", methods=["POST"])
 def register():
     print("Route /register appelée")
@@ -46,7 +59,7 @@ def register():
     user = User(
         username=data["username"],
         email=data["email"],
-        is_confirmed=False,
+        is_confirmed=True,  # Auto-confirmé en mode développement
         confirmation_token=token,
         preferences=prefs_str,
         code_postal=data.get("code_postal"),
@@ -57,24 +70,25 @@ def register():
     db.session.add(user)
     db.session.commit()
 
-    confirm_url = f"{BASE_URL}/api/confirm/{token}"
-    from back.app import mail
-    msg = Message("Confirme ton email", recipients=[user.email])
-    msg.html = f"""
-    <div style="font-family: Arial, sans-serif; background: #fff; color: #222; padding: 24px;">
-        <h2>Bienvenue sur CultureRadar !</h2>
-        <p>Merci de t'être inscrit. Clique sur le lien ci-dessous pour confirmer ton compte :</p>
-        <p>
-            <a href="{confirm_url}" style="color: #1976d2; text-decoration: underline; font-size: 16px;">
-                Confirmer mon compte
-            </a>
-        </p>
-        <p style="font-size:12px;color:#888;">Si tu n'es pas à l'origine de cette inscription, ignore ce message.</p>
-    </div>
-    """
-    mail.send(msg)
+    # Email de confirmation désactivé en mode développement
+    # confirm_url = f"{BASE_URL}/api/confirm/{token}"
+    # from back.app import mail
+    # msg = Message("Confirme ton email", recipients=[user.email])
+    # msg.html = f"""
+    # <div style="font-family: Arial, sans-serif; background: #fff; color: #222; padding: 24px;">
+    #     <h2>Bienvenue sur CultureRadar !</h2>
+    #     <p>Merci de t'être inscrit. Clique sur le lien ci-dessous pour confirmer ton compte :</p>
+    #     <p>
+    #         <a href="{confirm_url}" style="color: #1976d2; text-decoration: underline; font-size: 16px;">
+    #             Confirmer mon compte
+    #         </a>
+    #     </p>
+    #     <p style="font-size:12px;color:#888;">Si tu n'es pas à l'origine de cette inscription, ignore ce message.</p>
+    # </div>
+    # """
+    # mail.send(msg)
 
-    return jsonify({"msg": "Utilisateur créé, vérifie tes mails pour confirmer ton compte"}), 201
+    return jsonify({"msg": "Compte créé avec succès"}), 201
 
 
 @auth_bp.route("/login", methods=["POST"])
@@ -133,30 +147,26 @@ def confirm_email(token):
 @auth_bp.route("/forgot-password", methods=["POST"])
 def forgot_password():
     data = request.get_json()
-    email = data.get("email")
-    user = User.query.filter_by(email=email).first()
+    identifier = data.get("email")  # Peut être un email ou un username
+    
+    # Chercher par email ou username
+    user = User.query.filter(
+        (User.email == identifier) | (User.username == identifier)
+    ).first()
+    
     if not user:
-        return jsonify({"msg": "Si cet email existe, un lien de réinitialisation a été envoyé."}), 200
+        return jsonify({"msg": "Utilisateur non trouvé"}), 404
+    
     token = secrets.token_urlsafe(32)
     user.reset_token = token
     db.session.commit()
-    reset_url = f"{FRONTEND_URL}/reset-password/{token}"
-    from back.app import mail
-    msg = Message("Réinitialisation du mot de passe", recipients=[user.email])
-    msg.html = f"""
-    <div style="font-family: Arial, sans-serif; background: #fff; color: #222; padding: 24px;">
-        <h2>Réinitialisation du mot de passe</h2>
-        <p>Pour réinitialiser ton mot de passe, clique sur le lien ci-dessous :</p>
-        <p>
-            <a href="{reset_url}" style="color: #1976d2; text-decoration: underline; font-size: 16px;">
-                Réinitialiser mon mot de passe
-            </a>
-        </p>
-        <p style="font-size:12px;color:#888;">Si tu n'as pas demandé cette action, ignore ce message.</p>
-    </div>
-    """
-    mail.send(msg)
-    return jsonify({"msg": "Si cet email existe, un lien de réinitialisation a été envoyé."}), 200
+    
+    # En mode développement, retourner directement le token
+    # Au lieu de l'envoyer par email
+    return jsonify({
+        "msg": "Utilisateur trouvé",
+        "token": token
+    }), 200
 
 
 @auth_bp.route("/reset-password/<token>", methods=["POST"])

@@ -20,8 +20,14 @@ events_bp = Blueprint("events", __name__)
 
 
 @events_bp.route("/events", methods=["POST"])
+@jwt_required()
 def create_event():
     data = request.get_json()
+    user_id = get_jwt_identity()
+    user = User.query.get(user_id)
+    if not user:
+        return {"msg": "Utilisateur non trouvé"}, 404
+    
     # Conversion des dates
     date_debut = None
     date_fin = None
@@ -32,7 +38,7 @@ def create_event():
             date_fin = datetime.strptime(data["date_fin"], "%Y-%m-%d").date()
     event_instance = event(
         title=data.get("title"),
-        author=data.get("author"),
+        author=user.username,  # Utilise le username de l'utilisateur connecté
         date_debut=date_debut,
         date_fin=date_fin,
         genres=",".join(data.get("genres", [])),
@@ -171,31 +177,13 @@ def get_genre_categories():
 
 
 @events_bp.route("/events/suggestions", methods=["GET"])
-@jwt_required()
 def get_suggestions():
-    user_id = get_jwt_identity()
-    user = User.query.get(user_id)
-    participated_ids = [ev.id for ev in user.events_participated]
-    prefs = user.preferences.split(",") if user.preferences else []
-
-    if participated_ids:
-        genres = set()
-        for ev in user.events_participated:
-            genres.update(ev.genres.split(",") if ev.genres else [])
-        candidates = event.query.filter(event.id.notin_(participated_ids)).all()
-        filtered = [ev for ev in candidates if any(g in (ev.genres or "") for g in genres)]
-        if not filtered and prefs:
-            filtered = [ev for ev in candidates if any(g in (ev.genres or "") for g in prefs)]
-    elif prefs:
-        candidates = event.query.all()
-        filtered = [ev for ev in candidates if any(g in (ev.genres or "") for g in prefs)]
-    else:
-        filtered = event.query.all()
-
-    if not filtered:
-        filtered = event.query.all()
-
-    suggestions = random.sample(filtered, min(8, len(filtered)))
+    # Retourne des suggestions aléatoires pour tous (même non connectés)
+    all_events = event.query.all()
+    if not all_events:
+        return jsonify([])
+    
+    suggestions = random.sample(all_events, min(8, len(all_events)))
     return jsonify([ev.to_dict() for ev in suggestions])
 
 

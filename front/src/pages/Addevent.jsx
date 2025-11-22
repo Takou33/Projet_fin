@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import eventservice from "../services/eventService";
+import api from "../services/api";
 
 const Addevent = ({ user }) => {
   const navigate = useNavigate();
@@ -21,9 +22,9 @@ const Addevent = ({ user }) => {
   const fileInputRef = useRef();
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL}/genres/categories`)
-      .then((res) => res.json())
-      .then(setCategories);
+    api.get("/genres/categories")
+      .then((res) => setCategories(res.data))
+      .catch(err => console.error("Erreur chargement catégories:", err));
   }, []);
 
   const handleCheck = (subcat) => {
@@ -86,7 +87,6 @@ const Addevent = ({ user }) => {
       }
       await eventservice.createevent({
         ...event,
-        author: user.username,
         genres: selected,
         latitude: geo.latitude,
         longitude: geo.longitude,

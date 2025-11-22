@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import authService from "../services/authService";
 import eventService from "../services/eventService";
+import api from "../services/api";
 
 export default function RegisterStep2({ userData, setUserData, setErrors, errors }) {
   const [categories, setCategories] = useState({});
@@ -11,9 +12,14 @@ export default function RegisterStep2({ userData, setUserData, setErrors, errors
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`${process.env.REACT_APP_API_URL}/genres/categories`)
-      .then(res => res.json())
-      .then(setCategories);
+    api.get("/genres/categories")
+      .then(res => {
+        console.log("Catégories reçues:", res.data);
+        console.log("Type:", typeof res.data);
+        console.log("Clés:", Object.keys(res.data));
+        setCategories(res.data);
+      })
+      .catch(err => console.error("Erreur lors du chargement des catégories:", err));
   }, []);
 
   const handleCategoryClick = (cat) => {
@@ -74,7 +80,8 @@ export default function RegisterStep2({ userData, setUserData, setErrors, errors
         latitude: geo.latitude,
         longitude: geo.longitude,
       });
-      navigate("/check-email");
+      alert("Compte créé avec succès ! Vous pouvez maintenant vous connecter.");
+      navigate("/login");
     } catch (error) {
       setErrors({ global: error.msg || "Erreur lors de l'inscription" });
     }
@@ -104,7 +111,9 @@ export default function RegisterStep2({ userData, setUserData, setErrors, errors
       </style>
       <form onSubmit={handleSubmit}>
         <h2>Choisis tes centres d'intérêt</h2>
+        {console.log("Rendu - categories:", categories, "Nombre de clés:", Object.keys(categories).length)}
         <div className="mb-3">
+          {Object.keys(categories).length === 0 && <p>Chargement des catégories...</p>}
           {Object.keys(categories).map(cat => (
             <button
               key={cat}

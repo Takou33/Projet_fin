@@ -4,6 +4,23 @@ export default function LegalNotice() {
   return (
     <div className="legal-page">
       <h1>Mentions légales</h1>
+      
+      <div style={{ 
+        backgroundColor: "#ff9800", 
+        color: "#000", 
+        padding: "20px", 
+        borderRadius: "8px", 
+        marginBottom: "30px",
+        border: "3px solid #f57c00",
+        fontSize: "1rem",
+        fontWeight: "500"
+      }}>
+        <h3 style={{ marginTop: 0, color: "#000" }}>⚠️ PROJET ÉTUDIANT FICTIF</h3>
+        <p style={{ marginBottom: 0 }}>
+          Ce site est un projet étudiant à but pédagogique uniquement. <strong>Aucun achat réel ne peut être effectué, aucune réservation n'est réellement prise en compte.</strong> Toutes les informations présentes sur ce site, y compris les adresses email, les coordonnées d'entreprise et les données utilisateurs, sont entièrement fictives. Ce projet ne constitue pas une entreprise réelle et n'offre aucun service commercial.
+        </p>
+      </div>
+
       <h2>Éditeur du site</h2>
       <p>
         Capsule Culture – SASU<br />
