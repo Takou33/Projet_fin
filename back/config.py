@@ -7,9 +7,14 @@ load_dotenv()
 class Config:
     basedir = os.path.abspath(os.path.dirname(__file__))
     SECRET_KEY = os.getenv("SECRET_KEY")
-    SQLALCHEMY_DATABASE_URI = (
-        f"sqlite:///{os.path.join(basedir, 'instance', 'events.db')}"
-    )
+    
+    # Utiliser DATABASE_URL de Render si disponible, sinon SQLite en local
+    database_url = os.getenv("DATABASE_URL")
+    if database_url and database_url.startswith("postgres://"):
+        # Render utilise postgres:// mais SQLAlchemy 1.4+ requiert postgresql://
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+    
+    SQLALCHEMY_DATABASE_URI = database_url or f"sqlite:///{os.path.join(basedir, 'instance', 'events.db')}"
     SQLALCHEMY_TRACK_MODIFICATIONS = (
         False if os.getenv("SQLALCHEMY_TRACK_MODIFICATIONS") == "False" else True
     )
