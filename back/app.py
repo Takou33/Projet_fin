@@ -1,10 +1,10 @@
 from flask import Flask
 from flask_migrate import Migrate
-from back.extensions import db
+from extensions import db
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from flask_mail import Mail
-from back.config import Config
+from config import Config
 from datetime import timedelta
 import os
 
@@ -23,13 +23,13 @@ CORS(
 mail = Mail(app)
 
 # Forcer l'import des modèles pour Flask-Migrate
-from back.models import user, event
-from back.models.user import User
-from back.models.event import event
-from back.models.notification import Notification
+from models import user, event
+from models.user import User
+from models.event import event
+from models.notification import Notification
 
-from back.routes.auth import auth_bp
-from back.routes.events import events_bp
+from routes.auth import auth_bp
+from routes.events import events_bp
 
 app.register_blueprint(auth_bp, url_prefix="/api")
 app.register_blueprint(events_bp, url_prefix="/api")
@@ -47,7 +47,7 @@ def ping():
 
 @app.route("/api/dbtest")
 def dbtest():
-    from back.models.user import User
+    from models.user import User
     try:
         user_count = User.query.count()
         return f"Nombre d'utilisateurs : {user_count}"
