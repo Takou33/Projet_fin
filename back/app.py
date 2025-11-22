@@ -34,6 +34,11 @@ from routes.events import events_bp
 app.register_blueprint(auth_bp, url_prefix="/api")
 app.register_blueprint(events_bp, url_prefix="/api")
 
+# Créer automatiquement les tables au démarrage
+with app.app_context():
+    db.create_all()
+    print("✓ Tables de base de données créées/vérifiées")
+
 
 @app.route("/")
 def index():
