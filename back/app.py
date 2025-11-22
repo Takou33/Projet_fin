@@ -63,16 +63,17 @@ def dbtest():
 @app.route("/api/import-events", methods=["POST"])
 def import_events():
     """Importer les événements depuis OpenAgenda"""
-    import requests
-    import re
-    from datetime import datetime
-    from models.event import event
-    
-    OA_KEY = "8a135178e6c348169f33f0bab8e1dc17"
-    # Importer seulement 1 agenda pour éviter le timeout (plan gratuit Render = 30s max)
-    AGENDAS = [
-        {"uid": "2363867", "name": "Nantes"},
-    ]
+    try:
+        import requests
+        import re
+        from datetime import datetime
+        from models.event import event
+        
+        OA_KEY = "8a135178e6c348169f33f0bab8e1dc17"
+        # Importer seulement 1 agenda pour éviter le timeout (plan gratuit Render = 30s max)
+        AGENDAS = [
+            {"uid": "2363867", "name": "Nantes"},
+        ]
     
     def parse_date(date_str):
         if not date_str:
@@ -149,7 +150,13 @@ def import_events():
         db.session.commit()
         total_count += count
     
-    return {"msg": f"{total_count} événements importés avec succès"}, 200
+        return {"msg": f"{total_count} événements importés avec succès"}, 200
+    
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"Erreur lors de l'import: {error_details}")
+        return {"msg": f"Erreur: {str(e)}", "details": error_details}, 500
 
 
 if __name__ == "__main__":
