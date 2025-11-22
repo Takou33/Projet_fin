@@ -1,10 +1,10 @@
 import math
 import random
 from flask import Blueprint, jsonify, request
-from back.extensions import db
-from back.models.event import event
-from back.models.user import User
-from back.models.notification import Notification
+from extensions import db
+from models.event import event
+from models.user import User
+from models.notification import Notification
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from datetime import datetime
 

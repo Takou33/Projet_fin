@@ -1,12 +1,12 @@
 from flask import Blueprint, request, jsonify, redirect
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from back.extensions import db
-from back.models.user import User
+from extensions import db
+from models.user import User
 import secrets
 from flask_mail import Message
 import re
 from werkzeug.security import generate_password_hash, check_password_hash
-from back.config import BASE_URL, FRONTEND_URL
+from config import BASE_URL, FRONTEND_URL
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -72,7 +72,7 @@ def register():
 
     # Email de confirmation désactivé en mode développement
     # confirm_url = f"{BASE_URL}/api/confirm/{token}"
-    # from back.app import mail
+    # from app import mail
     # msg = Message("Confirme ton email", recipients=[user.email])
     # msg.html = f"""
     # <div style="font-family: Arial, sans-serif; background: #fff; color: #222; padding: 24px;">

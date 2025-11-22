@@ -1,6 +1,6 @@
-from back.extensions import db
+from extensions import db
 from datetime import datetime
-from back.models.user import User
+from models.user import User
 
 class Notification(db.Model):
     __tablename__ = "notification"
