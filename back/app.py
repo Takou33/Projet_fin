@@ -60,6 +60,17 @@ def dbtest():
         return f"Erreur DB : {e}"
 
 
+@app.route("/api/recreate-tables", methods=["POST"])
+def recreate_tables():
+    """ATTENTION: Supprime et recrée toutes les tables - Utiliser avec précaution!"""
+    try:
+        db.drop_all()
+        db.create_all()
+        return {"msg": "Tables recréées avec succès"}, 200
+    except Exception as e:
+        return {"msg": f"Erreur: {str(e)}"}, 500
+
+
 @app.route("/api/import-events", methods=["POST"])
 def import_events():
     """Importer les événements depuis OpenAgenda"""
