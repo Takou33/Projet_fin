@@ -1,6 +1,6 @@
-from back.app import app
-from back.extensions import db
-from back.models.event import event
+from app import app
+from extensions import db
+from models.event import event
 import requests
 from datetime import datetime
 import re
