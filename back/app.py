@@ -71,6 +71,60 @@ def recreate_tables():
         return {"msg": f"Erreur: {str(e)}"}, 500
 
 
+@app.route("/api/import-json-events", methods=["POST"])
+def import_json_events():
+    """Importer des événements depuis un JSON uploadé"""
+    try:
+        from datetime import datetime
+        from models.event import event
+        
+        data = request.get_json()
+        events_data = data.get("events", [])
+        
+        count = 0
+        for ev_data in events_data:
+            # Convertir les dates string en objets date
+            date_debut = None
+            date_fin = None
+            if ev_data.get("date_debut"):
+                date_debut = datetime.strptime(ev_data["date_debut"], "%Y-%m-%d").date()
+            if ev_data.get("date_fin"):
+                date_fin = datetime.strptime(ev_data["date_fin"], "%Y-%m-%d").date()
+            
+            # Vérifier si l'événement existe déjà
+            exists = event.query.filter_by(
+                title=ev_data["title"], 
+                date_debut=date_debut
+            ).first()
+            
+            if not exists:
+                new_event = event(
+                    title=ev_data["title"],
+                    author=ev_data["author"],
+                    date_debut=date_debut,
+                    date_fin=date_fin,
+                    genres=ev_data.get("genres"),
+                    description=ev_data.get("description"),
+                    cover_image=ev_data.get("cover_image"),
+                    latitude=ev_data.get("latitude"),
+                    longitude=ev_data.get("longitude"),
+                    prix=ev_data.get("prix"),
+                    event_url=ev_data.get("event_url"),
+                    code_postal=ev_data.get("code_postal"),
+                )
+                db.session.add(new_event)
+                count += 1
+        
+        db.session.commit()
+        return {"msg": f"{count} événements importés avec succès"}, 200
+    
+    except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print(f"Erreur lors de l'import JSON: {error_details}")
+        return {"msg": f"Erreur: {str(e)}", "details": error_details}, 500
+
+
 @app.route("/api/import-events", methods=["POST"])
 def import_events():
     """Importer les événements depuis OpenAgenda"""
