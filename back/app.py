@@ -17,7 +17,7 @@ migrate = Migrate(app, db)
 jwt = JWTManager(app)
 CORS(
     app,
-    origins=["https://cultureradar-front.onrender.com", "http://localhost:3000"],
+    origins=["https://projet-fin.onrender.com", "http://localhost:3000"],
     supports_credentials=True
 )
 mail = Mail(app)

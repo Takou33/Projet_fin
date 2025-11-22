@@ -22,5 +22,5 @@ class Config:
     MAIL_DEFAULT_SENDER = "noreply@cultureradar.com"
     MAIL_SUPPRESS_SEND = False
 
-BASE_URL = os.environ.get("BASE_URL", "http://localhost:5000")
-FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:3000")
+BASE_URL = os.environ.get("BASE_URL", "https://capsule-culture-rattrapagej.onrender.com")
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "https://projet-fin.onrender.com")
